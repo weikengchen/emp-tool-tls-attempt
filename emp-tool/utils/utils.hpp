@@ -142,7 +142,7 @@ inline uint64_t bool_to64(const bool * data) {
 	return res;
 }
 inline block bool_to128(const bool * data) {
-	return makeBlock(bool_to64(data+64), bool_to64(data));
+	return make_block(bool_to64(data+64), bool_to64(data));
 }
 
 inline void int64_to_bool(bool * data, uint64_t input, int length) {

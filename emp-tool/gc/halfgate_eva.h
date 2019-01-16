@@ -4,7 +4,7 @@
 #include "emp-tool/io/file_io_channel.h"
 #include "emp-tool/utils/block.h"
 #include "emp-tool/utils/utils.h"
-#include "emp-tool/utils/prp.h"
+#include "emp-tool/utils/crh.h"
 #include "emp-tool/execution/circuit_execution.h"
 #include "emp-tool/garble/garble_gate_halfgates.h"
 #include <iostream>
@@ -12,7 +12,7 @@ namespace emp {
 template<typename T, RTCktOpt rt = on>
 class HalfGateEva:public CircuitExecution{ public:
 	int64_t gid = 0;
-	PRP prp;
+	CRH crh;
 	T * io;
 	bool with_file_io = false;
 	FileIO * fio;
@@ -25,47 +25,47 @@ class HalfGateEva:public CircuitExecution{ public:
 		this->fio = fio;
 	}
 	bool is_public(const block & b, int party) {
-		return isZero(&b) or isOne(&b);
+		return isZero(b) or isOne(b);
 	}
 	block public_label(bool b) override {
-		return b? one_block() : zero_block();
+		return b? one_block : zero_block;
 	}
 	block and_gate(const block& a, const block& b) override {
 		block out, table[2];
-		if (isZero(&a) or isOne(&a) or isZero(&b) or isOne(&b)) {
+		if (isZero(a) or isOne(a) or isZero(b) or isOne(b)) {
 			return _mm_and_si128(a, b);
 		} else {
 			io->recv_block(table, 2);
 			if(with_file_io) {
 				fio->send_block(table, 2);
-				return prp.H(a, gid++);
+				return crh.H(a, gid++);
 			}
-			garble_gate_eval_halfgates(a, b, &out, table, gid++, &prp.aes);
+			garble_gate_eval_halfgates(a, b, &out, table, gid++, &crh.aes);
 			return out;
 		}
 	}
 	block xor_gate(const block&a, const block& b) override {
-		if(isOne(&a))
+		if(isOne(a))
 			return not_gate(b);
-		else if (isOne(&b))
+		else if (isOne(b))
 			return not_gate(a);
-		else if (isZero(&a))
+		else if (isZero(a))
 			return b;
-		else if (isZero(&b))
+		else if (isZero(b))
 			return a;
 		else {
-			block res = xorBlocks(a, b);
-			if (isZero(&res))
+			block res = xor_block(a, b);
+			if (isZero(res))
 				return fix_point;
 			else return res;
-//			return xorBlocks(a, b);
+//			return xor_block(a, b);
 		}
 	}
 	block not_gate(const block&a) override {
-		if (isZero(&a))
-			return one_block();
-		else if (isOne(&a))
-			return zero_block();
+		if (isZero(a))
+			return one_block;
+		else if (isOne(a))
+			return zero_block;
 		else
 			return a;
 	}
@@ -73,11 +73,11 @@ class HalfGateEva:public CircuitExecution{ public:
 		block h[4], t;
 		for(int i = 0; i < length; ++i) {
 			io->recv_block(h, 4);
-			t = prp.H(old_block[i], 2*i);
-			if(block_cmp(&t, &h[0], 1)) {
-				new_block[i] = xorBlocks(h[1], prp.H(old_block[i], 2*i+1));
+			t = crh.H(old_block[i], 2*i);
+			if(cmp_blocks(&t, &h[0], 1)) {
+				new_block[i] = xor_block(h[1], crh.H(old_block[i], 2*i+1));
 			} else {
-				new_block[i] = xorBlocks(h[3], prp.H(old_block[i], 2*i+1));
+				new_block[i] = xor_block(h[3], crh.H(old_block[i], 2*i+1));
 			}
 		}
 	}
@@ -86,7 +86,7 @@ template<typename T>
 class HalfGateEva<T,RTCktOpt::off>:public CircuitExecution {
 public:
 	int64_t gid = 0;
-	PRP prp;
+	CRH crh;
 	T * io;
 	bool with_file_io = false;
 	FileIO * fio;
@@ -110,13 +110,13 @@ public:
 		io->recv_block(table, 2);
 		if(with_file_io) {
 			fio->send_block(table, 2);
-			return prp.H(a, gid++);
+			return crh.H(a, gid++);
 		}
-		garble_gate_eval_halfgates(a, b, &out, table, gid++, &prp.aes);
+		garble_gate_eval_halfgates(a, b, &out, table, gid++, &crh.aes);
 		return out;
 	}
 	block xor_gate(const block& a, const block& b) override {
-		return xorBlocks(a,b);
+		return xor_block(a,b);
 	}
 	block not_gate(const block&a) override {
 		return xor_gate(a, public_label(true));
@@ -125,11 +125,11 @@ public:
 		block h[4], t;
 		for(int i = 0; i < length; ++i) {
 			io->recv_block(h, 4);
-			t = prp.H(old_block[i], 2*i);
-			if(block_cmp(&t, &h[0], 1)) {
-				new_block[i] = xorBlocks(h[1], prp.H(old_block[i], 2*i+1));
+			t = crh.H(old_block[i], 2*i);
+			if(cmp_blocks(&t, &h[0], 1)) {
+				new_block[i] = xor_block(h[1], crh.H(old_block[i], 2*i+1));
 			} else {
-				new_block[i] = xorBlocks(h[3], prp.H(old_block[i], 2*i+1));
+				new_block[i] = xor_block(h[3], crh.H(old_block[i], 2*i+1));
 			}
 		}
 	}

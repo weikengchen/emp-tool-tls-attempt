@@ -21,18 +21,18 @@ class XorTree{public:
 		for(int i = 0; i < N; ++i)
 			for(int j = 0; j < M; ++j) {
 				matrix[i][j] = (bM[i][j]%2 == 1);
-				blockM[i][j] = matrix[i][j] ? one_block(): zero_block();
+				blockM[i][j] = matrix[i][j] ? one_block: zero_block;
 			}
 	}
 	void circuitN(block* out, block * in, int dim = N) {
 		assert(dim <= N);
 	
 		for(int i = 0; i < dim; ++i) {
-			block res = zero_block();
+			block res = zero_block;
 			for(int j = 0; j < M; ++j) {
-				res = xorBlocks(res, andBlocks(in[j], blockM[i][j]));
+				res = xor_block(res, andBlocks(in[j], blockM[i][j]));
 			}
-			out[i] = xorBlocks(res, in[i+M]);
+			out[i] = xor_block(res, in[i+M]);
 		}
 	}
 

@@ -9,17 +9,18 @@ namespace emp {
 
 class CRH: public PRP { 
 public:
-	CRH(const char * seed = fix_key):PRP(seed) {
-	}
-
-	CRH(const block& seed): PRP(seed) {
-	}
-
 	block H(block in) {
 		block t = in; 
 		permute_block(&t, 1);
-		return xorBlocks(t, in);
+		return xor_block(t, in);
 	}
+
+	block H(block in, uint64_t i) {
+		block t = xor_block(in, make_block(0,i)); 
+		permute_block(&t, 1);
+		return xor_block(t, in);
+	}
+
 
 #ifdef __GNUC__
 	#ifndef __clang__
@@ -34,7 +35,7 @@ public:
 		for (int i = 0; i < n; ++i)
 			tmp[i] = in[i];
 		permute_block(tmp, n);
-		xorBlocks_arr(out, in, tmp, n);
+		xor_blocks(out, in, tmp, n);
 	}
 #ifdef __GNUC__
 	#ifndef __clang__
@@ -51,12 +52,11 @@ public:
 		for(int i = 0; i < n; ++i)
 			scratch[i] = in[i];
 		permute_block(scratch, n);
-		xorBlocks_arr(out, in, scratch, n);
+		xor_blocks(out, in, scratch, n);
 		if(del) {
 			delete[] scratch;
 			scratch = nullptr;
 		}
-
 	}
 };
 }

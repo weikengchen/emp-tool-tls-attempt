@@ -23,6 +23,7 @@
 #include "emp-tool/utils/hash.h"
 #include "emp-tool/utils/prg.h"
 #include "emp-tool/utils/prp.h"
+#include "emp-tool/utils/aes.h"
 #include "emp-tool/utils/crh.h"
 #include "emp-tool/utils/ccrh.h"
 #include "emp-tool/utils/tccrh.h"
@@ -36,7 +37,6 @@
 #include "emp-tool/gc/privacy_free_eva.h"
 #include "emp-tool/gc/privacy_free_gen.h"
 
-#include "emp-tool/garble/aes.h"
 #include "emp-tool/garble/garble_gate_halfgates.h"
 #include "emp-tool/garble/garble_gate_privacy_free.h"
 

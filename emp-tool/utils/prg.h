@@ -35,14 +35,21 @@ class PRG { public:
 			unsigned long long r0, r1;
 			_rdseed64_step(&r0);
 			_rdseed64_step(&r1);
-			v = makeBlock(r0, r1);
+			v = make_block(r0, r1);
 #endif
 			reseed(&v);
 		}
 	}
+
+	PRG(block v, int id = 0) {	
+		v = xor_block(v, make_block(0LL, id));
+		AES_set_encrypt_key(v, &aes);
+		counter = 0;
+	}
+
 	void reseed(const void * key, uint64_t id = 0) {
 		block v = _mm_loadu_si128((block*)key);
-		v = xorBlocks(v, makeBlock(0LL, id));
+		v = xor_block(v, make_block(0LL, id));
 		AES_set_encrypt_key(v, &aes);
 		counter = 0;
 	}
@@ -77,7 +84,7 @@ class PRG { public:
 
 	void random_block(block * data, int nblocks=1) {
 		for (int i = 0; i < nblocks; ++i) {
-			data[i] = makeBlock(0LL, counter++);
+			data[i] = make_block(0LL, counter++);
 		}
 		int i = 0;
 		for(; i < nblocks-AES_BATCH_SIZE; i+=AES_BATCH_SIZE) {

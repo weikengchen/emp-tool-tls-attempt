@@ -5,7 +5,7 @@
 #include "emp-tool/io/file_io_channel.h"
 #include "emp-tool/utils/block.h"
 #include "emp-tool/utils/utils.h"
-#include "emp-tool/utils/prp.h"
+#include "emp-tool/utils/crh.h"
 #include "emp-tool/utils/hash.h"
 #include "emp-tool/execution/circuit_execution.h"
 #include "emp-tool/garble/garble_gate_privacy_free.h"
@@ -13,7 +13,7 @@
 namespace emp {
 template<typename T>
 class PrivacyFreeEva:public CircuitExecution{ public:
-	PRP prp;
+	CRH crh;
 	T * io;
 	block constant[2];
 	int64_t gid = 0;
@@ -31,11 +31,11 @@ class PrivacyFreeEva:public CircuitExecution{ public:
 	block and_gate(const block& a, const block& b) {
 		block out[2], table[1];
 		io->recv_block(table, 1);
-		garble_gate_eval_privacy_free(a, b, out, table, gid++, &prp.aes);
+		garble_gate_eval_privacy_free(a, b, out, table, gid++, &crh.aes);
 		return out[0];
 	}
 	block xor_gate(const block& a, const block& b) {
-		return xorBlocks(a,b);
+		return xor_block(a,b);
 	}
 	block not_gate(const block& a) {
 		return xor_gate(a, public_label(true));
@@ -45,9 +45,9 @@ class PrivacyFreeEva:public CircuitExecution{ public:
 		for(int i = 0; i < length; ++i) {
 			io->recv_block(h, 2);
 			if(!b[i]){
-				new_block[i] = xorBlocks(h[0], prp.H(old_block[i], i));
+				new_block[i] = xor_block(h[0], crh.H(old_block[i], i));
 			} else {
-				new_block[i] = xorBlocks(h[1], prp.H(old_block[i], i));
+				new_block[i] = xor_block(h[1], crh.H(old_block[i], i));
 			}
 		}
 	}

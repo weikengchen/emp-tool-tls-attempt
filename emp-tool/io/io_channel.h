@@ -57,7 +57,7 @@ public:
 		block * tmp = new block[len];
 		prg->random_block(tmp, len);
 		for(int i = 0; i < len; ++i)
-			tmp[i] = xorBlocks(data[i], tmp[i]);
+			tmp[i] = xor_block(data[i], tmp[i]);
 		send_block(tmp, len);
 		delete[] tmp;
 	}
@@ -93,7 +93,7 @@ public:
 		block * tmp = new block[len];
 		prg->random_block(tmp, len);
 		for(int i = 0; i < len; ++i)
-			data[i] = xorBlocks(data[i], tmp[i]);
+			data[i] = xor_block(data[i], tmp[i]);
 		delete[] tmp;
 	}
 
