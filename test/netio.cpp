@@ -14,6 +14,9 @@ int main(int argc, char** argv) {
 			block * data = new block[length];
 			auto start = clock_start();
 			for (int i = 0; i < times; ++i) {
+				if(times % 1000 == 0){
+					printf("%d\n", i);
+				}
 				io->send_block(data, length);
 			}
 			double interval = time_from(start);
@@ -32,4 +35,3 @@ int main(int argc, char** argv) {
 	}
 	delete io;
 }
-
